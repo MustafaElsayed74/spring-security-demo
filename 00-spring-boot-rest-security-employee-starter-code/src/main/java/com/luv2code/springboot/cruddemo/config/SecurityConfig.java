@@ -7,6 +7,8 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -46,10 +48,27 @@ public class SecurityConfig {
 //        return new InMemoryUserDetailsManager(loz, loza, desha);
 //    }
 
+
+
+
     //this will allow spring security to use the security tables(users, authorities) which we previously created in the database to check the authentication
+//    @Bean
+//    public UserDetailsManager userDetailsManager(DataSource dataSource) {
+//        return new JdbcUserDetailsManager(dataSource);
+//    }
+
+
+
+    //this will allow spring security to use the custom security tables (user defined not the standard) which we previously created in the database to check the authentication
     @Bean
-    public UserDetailsManager userDetailsManager(DataSource dataSource){
-        return new JdbcUserDetailsManager(dataSource);
+    public UserDetailsManager userDetailsManager(DataSource dataSource) {
+        JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
+        userDetailsManager
+                .setUsersByUsernameQuery("select user_id, pw, active ve from members where user_id=?");
+        userDetailsManager
+                .setAuthoritiesByUsernameQuery("select user_id,role from roles where user_id=?");
+
+        return userDetailsManager;
     }
 
     @Bean
